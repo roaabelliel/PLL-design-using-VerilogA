@@ -15,15 +15,15 @@
 2. [PLL Architecture](https://www.google.com/search?q=%23pll-architecture)
 3. [Repository Structure](https://www.google.com/search?q=%23repository-structure)
 4. [Block-by-Block Design](https://www.google.com/search?q=%23block-by-block-design)
-* [Phase-Frequency Detector (PFD)](https://www.google.com/search?q=%231-phase-frequency-detector-pfd)
-* [Charge Pump (CHP)](https://www.google.com/search?q=%232-charge-pump-chp)
-* [Voltage-Controlled Oscillator (VCO)](https://www.google.com/search?q=%233-voltage-controlled-oscillator-vco)
-* [Frequency Divider](https://www.google.com/search?q=%234-frequency-divider)
+  * [Phase-Frequency Detector (PFD)](https://www.google.com/search?q=%231-phase-frequency-detector-pfd)
+  * [Charge Pump (CHP)](https://www.google.com/search?q=%232-charge-pump-chp)
+  * [Voltage-Controlled Oscillator (VCO)](https://www.google.com/search?q=%233-voltage-controlled-oscillator-vco)
+  * [Frequency Divider](https://www.google.com/search?q=%234-frequency-divider)
 
 
 5. [Integration & Simulation](https://www.google.com/search?q=%23integration--simulation)
-* [All Verilog-A PLL](https://www.google.com/search?q=%23all-verilog-a-pll)
-* [Mixed PLL (Transistor-Level Divider)](https://www.google.com/search?q=%23mixed-pll-transistor-level-divider)
+  * [All Verilog-A PLL](https://www.google.com/search?q=%23all-verilog-a-pll)
+  * [Mixed PLL (Transistor-Level Divider)](https://www.google.com/search?q=%23mixed-pll-transistor-level-divider)
 
 
 6. [Key Results](https://www.google.com/search?q=%23key-results)
