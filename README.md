@@ -1,31 +1,37 @@
+
 # PLL Design and Verilog-A Behavioral Modeling
-**Course:** Analog/Mixed-Signal Simulation and Modeling | IEEE ASU Student Branch   
-**Tool:** Cadence Virtuoso (Spectre simulator)  
-**Methodology:** Top-down design using Verilog-A behavioral models + transistor-level refinement
+**Course:** Analog/Mixed-Signal Simulation and Modeling | IEEE ASU Student Branch 
+**Tool:** Cadence Virtuoso (Spectre simulator) 
+**Methodology:** Top-down design using Verilog-A behavioral models + transistor-level refinement 
 
 ---
 
 ## Table of Contents
-1. [Project Overview](#project-overview)
-2. [PLL Architecture](#pll-architecture)
-3. [Repository Structure](#repository-structure)
-4. [Block-by-Block Design](#block-by-block-design)
-   - [Phase-Frequency Detector (PFD)](#1-phase-frequency-detector-pfd)
-   - [Charge Pump (CHP)](#2-charge-pump-chp)
-   - [Voltage-Controlled Oscillator (VCO)](#3-voltage-controlled-oscillator-vco)
-   - [Frequency Divider](#4-frequency-divider)
-5. [Integration & Simulation](#integration--simulation)
-   - [All Verilog-A PLL](#all-verilog-a-pll)
-   - [Mixed PLL (Transistor-Level Divider)](#mixed-pll-transistor-level-divider)
-6. [Key Results](#key-results)
-7. [Design Parameter](#design-parameter)
-8. [How to Run](#how-to-run)
+
+1. [Project Overview](https://www.google.com/search?q=%23project-overview)
+2. [PLL Architecture](https://www.google.com/search?q=%23pll-architecture)
+3. [Repository Structure](https://www.google.com/search?q=%23repository-structure)
+4. [Block-by-Block Design](https://www.google.com/search?q=%23block-by-block-design)
+* [Phase-Frequency Detector (PFD)](https://www.google.com/search?q=%231-phase-frequency-detector-pfd)
+* [Charge Pump (CHP)](https://www.google.com/search?q=%232-charge-pump-chp)
+* [Voltage-Controlled Oscillator (VCO)](https://www.google.com/search?q=%233-voltage-controlled-oscillator-vco)
+* [Frequency Divider](https://www.google.com/search?q=%234-frequency-divider)
+
+
+5. [Integration & Simulation](https://www.google.com/search?q=%23integration--simulation)
+* [All Verilog-A PLL](https://www.google.com/search?q=%23all-verilog-a-pll)
+* [Mixed PLL (Transistor-Level Divider)](https://www.google.com/search?q=%23mixed-pll-transistor-level-divider)
+
+
+6. [Key Results](https://www.google.com/search?q=%23key-results)
+7. [Design Parameters](https://www.google.com/search?q=%23design-parameters)
+8. [How to Run](https://www.google.com/search?q=%23how-to-run)
 
 ---
 
 ## Project Overview
 
-This project applies a **top-down design methodology** to a Phase-Locked Loop (PLL) — one of the most fundamental mixed-signal building blocks in clock generation, frequency synthesis, and CDR circuits. Each PLL block is first modeled behaviorally in **Verilog-A**, individually verified, then integrated into a full closed-loop system. In the final stage, the Verilog-A frequency divider is replaced with a **transistor-level schematic** to demonstrate mixed abstraction co-simulation using Cadence's Hierarchy Editor and config view.
+This project applies a **top-down design methodology** to a Phase-Locked Loop (PLL) — one of the most fundamental mixed-signal building blocks in clock generation, frequency synthesis, and high-speed data transceiver circuits. Each PLL block is first modeled behaviorally in **Verilog-A**, individually verified, then integrated into a full closed-loop system. In the final stage, the Verilog-A frequency divider is replaced with a **transistor-level schematic** to demonstrate mixed-abstraction co-simulation using Cadence's Hierarchy Editor and config view.
 
 ---
 
@@ -34,19 +40,31 @@ This project applies a **top-down design methodology** to a Phase-Locked Loop (P
 ```
               ┌─────────────────────────────────────────┐
               │                                         │
-REF ──► [PFD] ──► [Charge Pump] ──► [Loop Filter] ──► [VCO] ──► OUTPUT
-              ▲                                         │
-              │              [÷N Divider] ◄─────────────┘
-              └─────────────────────────────────────────┘
+REF ──► [PFD] ──► [Charge Pump] ──► [Loop Filter] ──► [VCO] ──► OUTPUT (960 MHz)
+        ▲                                               │
+        │                                               │
+        │              [÷8 Divider] ◄───────────────────┘
+        └───────────────────────────────────────────────┘
+
 ```
 
 | Block | Function |
-|-------|----------|
-| PFD | Detects phase/frequency error between REF and feedback; outputs UP/DN pulses |
-| Charge Pump | Converts UP/DN pulses to a current that charges/discharges the loop filter |
-| Loop Filter | Converts charge pump current to a smooth VCO control voltage |
-| VCO | Generates output frequency proportional to control voltage; gain = Kvco |
-| ÷N Divider | Divides output frequency by N; feeds back to PFD input |
+| --- | --- |
+| **PFD** | Detects phase/frequency error between REF ($120\text{ MHz}$) and feedback ($120\text{ MHz}$); outputs UP/DN pulses.
+
+ |
+| **Charge Pump** | Converts UP/DN pulses to a current ($I_{CHP} = 10\ \mu\text{A}$) that charges/discharges the loop filter.
+
+ |
+| **Loop Filter** | Passive $2^{\text{nd}}$ order low-pass filter ($R_z = 10.9\text{ k}\Omega$, $C_z = 20.6\text{ pF}$, $C_p = 0.662\text{ pF}$) converting pump current to a smooth VCO control voltage ($V_c$).
+
+ |
+| **VCO** | Generates an output frequency proportional to control voltage ($K_{VCO\_mean} = 1.9\text{ GHz/V}$).
+
+ |
+| **÷N Divider** | Divides high-speed output clock frequency by a fixed ratio of $N=8$ to feed back to the PFD input.
+
+ |
 
 ---
 
@@ -56,32 +74,24 @@ REF ──► [PFD] ──► [Charge Pump] ──► [Loop Filter] ──► [V
 PLL-design-using-VerilogA/
 │
 ├── verilog_a/
-│   ├── pfd.vams              # Phase-Frequency Detector
-│   ├── charge_pump.vams      # Charge Pump
-│   ├── vco.vams              # Voltage-Controlled Oscillator
-│   └── divider.vams          # Frequency Divider (÷N)
+│   ├── pfd.vams              # Phase-Frequency Detector model
+│   ├── charge_pump.vams      # Charge Pump model
+│   ├── vco.vams              # Voltage-Controlled Oscillator model
+│   └── divider.vams          # Frequency Divider (÷N) behavioral model
 │
 ├── schematics/
-│   ├── dff_transistor/       # Transistor-level DFF for divider
-│   └── divider_transistor/   # Transistor-level ÷N divider
+[cite_start]│   ├── dff_transistor/       # Transistor-level Transmission-Gate DFF [cite: 83]
+[cite_start]│   └── divider_transistor/   # Transistor-level cascaded ÷8 divider [cite: 85]
 │
 ├── testbenches/
-│   ├── tb_pfd/               # PFD standalone testbench
-│   ├── tb_chp/               # Charge pump standalone testbench
-│   ├── tb_vco/               # VCO tuning curve testbench
-│   ├── tb_divider/           # Divider testbench (Verilog-A & transistor)
-│   └── tb_pll_full/          # Full closed-loop PLL testbench
-│
-├── configs/
-│   ├── pll_all_verilog_a/    # Config view: all behavioral blocks
-│   └── pll_mixed/            # Config view: behavioral PFD/CHP/VCO + transistor divider
-│
-├── results/
-│   ├── control_voltage/      # Vctrl vs. time plots (lock acquisition)
-│   ├── frequency_plots/      # REF vs. output frequency after lock
-│   └── log_files/            # Spectre simulation logs with runtime
+[cite_start]│   ├── tb_pfd/               # PFD standalone testbench [cite: 70]
+[cite_start]│   ├── tb_chp/               # Charge pump standalone testbench [cite: 73]
+[cite_start]│   ├── tb_vco/               # VCO tuning curve testbench [cite: 75]
+[cite_start]│   ├── tb_divider/           # Divider testbench (Verilog-A & transistor) [cite: 80, 85]
+[cite_start]│   └── tb_pll_full/          # Full closed-loop PLL testbench [cite: 87]
 │
 └── README.md
+
 ```
 
 ---
@@ -90,71 +100,86 @@ PLL-design-using-VerilogA/
 
 ### 1. Phase-Frequency Detector (PFD)
 
-**Function:** Compares the rising edges of the reference clock (REF) and the divided feedback signal (FB). Generates a UP pulse if REF leads FB, or a DN pulse if FB leads REF. Both pulses reset when both are high (after a short delay to avoid dead zone).
+**Function:** Compares the rising edges of the reference clock (REF) and the divided feedback signal (FB). Generates an UP pulse if REF leads FB, or a DN pulse if FB leads REF. Both pulses reset when both are high to mitigate the dead-zone effect.
 
-**Verilog-A model — key behaviour:**
-```
-if (REF rises before FB)  → UP pulse width ∝ phase error
-if (FB  rises before REF) → DN pulse width ∝ phase error
-at lock: UP = DN ≈ short reset pulses (no net charge injected)
-```
+**Verilog-A model — key behavior:**
 
-**Verification:** Testbench applies REF and FB with a known phase offset → observe UP/DN pulse widths proportional to the offset (reproduces behaviour analogous to Fig. 6.13/6.14 of the reference).
+* 
+`REF` rises before `FB` $\rightarrow$ `UP` pulse width proportional to phase error.
+
+
+* 
+`FB` rises before `REF` $\rightarrow$ `DN` pulse width proportional to phase error.
+
+
+* At lock: `UP` and `DN` show equal, ultra-short reset pulses with zero net charge injected into the pump.
+
+
+
+**Verification:** Testbench applies inputs with controlled phase offsets . stand-alone simulations show clean, non-overlapping transient pulse widths corresponding directly to leading phase trends.
 
 ---
 
 ### 2. Charge Pump (CHP)
 
-**Function:** Steered by the UP/DN signals. When UP is active: sources current +Icp into the loop filter. When DN is active: sinks current −Icp from the loop filter. At lock, the net average current is zero.
+**Function:** Controlled by `UP`/`DN` digital signals. When `UP` is high, it sources current into the loop filter; when `DN` is high, it sinks current out of the filter. The current amplitude is fixed at $I_{CHP} = 10\ \mu\text{A}$.
 
-**Verilog-A model — key behaviour:**
+**Verilog-A model — key behavior:**
+
 ```
-UP = 1 → I_out = +Icp
-DN = 1 → I_out = −Icp
-UP = DN = 0 → I_out = 0
+UP = 1, DN = 0  →  I_out = +10 uA
+UP = 0, DN = 1  →  I_out = -10 uA
+UP = 0, DN = 0  →  I_out = 0 (High Impedance State)
+
 ```
 
-**Verification:** Drive UP/DN with controlled pulse widths → verify output current matches ±Icp (analogous to Fig. 6.18).
+**Verification:** Standalone transient sweeps trace a linear input-output tracking characteristic, verifying current matching tolerances against the control pulses.
 
 ---
 
 ### 3. Voltage-Controlled Oscillator (VCO)
 
-**Function:** Outputs a sinusoidal (or digital) signal whose frequency is linearly controlled by an input voltage.
+**Function:** Outputs a periodic clock whose frequency is linearly controlled by the incoming input loop voltage ($V_{ctrl}$).
 
 $$f_{out} = f_0 + K_{VCO} \cdot V_{ctrl}$$
 
-**Your Kvco:**
-```
-Kvco = (random_number / 100) × 1e9  Hz/V
-       where random_number ∈ [50, 400]
-```
-> Replace `random_number` in the line above with your actual generated value and update `vco.vams` accordingly.
+**Your Kvco:** * **$K_{VCO}$ Parameter:** Set to **$600\text{ MHz/V} \rightarrow 6\text{ GHz/V}$** ($K_{VCO\_mean} = 1.9\text{ GHz/V}$).
 
-**Verification:** Sweep Vctrl from 0 V to Vdd → plot fout vs. Vctrl → single tuning curve. Add a marker at Vctrl corresponding to the target output frequency (analogous to Fig. 6.11).
+* 
+**Free-Running Frequency ($f_0$):** Set to $500.14\text{ MHz}$ at $V_{ctrl} = 0.2\text{ V}$.
 
-**Analytical lock voltage:**
-$$V_{ctrl,lock} = \frac{f_{target} - f_0}{K_{VCO}}$$
 
-Compare this value against the Vctrl cursor reading from the closed-loop simulation (deliverable 12 & 13).
+
+**Verification:** Standalone $V_{ctrl}$ sweeps track an output tuning path mapping $500.14\text{ MHz}$ at $0.2\text{ V}$, passing through $1.0001\text{ GHz}$ at $0.6\text{ V}$, up to $1.5002\text{ GHz}$ at $1.0\text{ V}$.
+
+**Analytical Lock Voltage Calculation:**
+For a target output frequency of $f_{target} = 960\text{ MHz}$:
+
+
+$$V_{ctrl,lock} = \frac{960\text{ MHz} - 500.14\text{ MHz}}{600\text{ MHz/V}} + 0.2\text{ V} \approx 0.966\text{ V}$$
 
 ---
 
 ### 4. Frequency Divider
 
-**Function:** Divides the VCO output frequency by integer N, producing the feedback signal for the PFD. At lock: fout = N × fref.
+**Function:** Divides the high-frequency VCO output clock ($960\text{ MHz}$) down to match the reference clock frequency ($120\text{ MHz}$) at the PFD interface.
 
 #### Stage A — Verilog-A model
-Behaviorally counts N VCO cycles, then toggles output → ideal divide-by-N.
 
-**Verification:** Apply a known frequency → verify output period = N × input period (analogous to Fig. 6.20).
+Counts $N=8$ incoming VCO edges before toggling output, providing an ideal, noise-free, division behavior.
+
+**Verification:** Standalone testing confirms that for a $4\text{ ns}$ cycle input window, a perfectly stable $16\text{ ns}$ period waveform output is generated ($N=4$ configuration verified in standalone validation stages).
 
 #### Stage B — Transistor-level schematic
-Built from **cascaded DFFs** (master-slave topology). Each DFF divides by 2; chain of k DFFs → divide by 2^k.
 
-**Transistor-level DFF:** Document the schematic view clearly — show all transistors, clock connections (CK and CKB), D input, and Q/QB outputs.
+Built out of **cascaded D-Flip-Flops (DFF)** implemented using $0.13\ \mu\text{m}$ CMOS transmission-gate master-slave architecture. The sequential flip-flops are chained together to implement the full division scale.
 
-**Verification:** Use the same testbench as Stage A — the waveform should be identical, confirming functional equivalence between behavioral and physical implementations.
+* 
+**Transistor-level DFF:** Employs complementary NMOS/PMOS transmission pass-gates to isolate the master stage latch from the slave phase based on `clk` and `clkb`. It includes asynchronous reset routing to secure initial state alignment.
+
+
+
+**Verification:** Mixed-level simulation waveforms trace exact physical functional matching, capturing timing-accurate propagation delays and real rise/fall transition tails.
 
 ---
 
@@ -162,73 +187,84 @@ Built from **cascaded DFFs** (master-slave topology). Each DFF divides by 2; cha
 
 ### All Verilog-A PLL
 
-**Setup in Cadence:**
-1. Create a top-level schematic instantiating PFD, CHP, loop filter (passive RC), VCO, and divider — all using their Verilog-A cell views
-2. Open Hierarchy Editor → set all blocks to `veriloga` view
-3. Create a config view pointing to this hierarchy
-4. Run transient simulation until Vctrl settles (loop locks)
+Integrated with all block cell-views set to `veriloga` inside the Cadence Hierarchy Editor. The loop tracking rapidly drives $V_{ctrl}$ to settle firmly at the expected lock location.
 
-**Expected outputs:**
-- Vctrl vs. time: starts away from lock voltage, converges and settles → add cursor to show steady-state Vctrl
-- REF and feedback frequency overlay: both converge to same frequency at lock → add A/B markers to confirm fFB = fREF
+* 
+**Reference Frequency ($f_{ref}$):** $120\text{ MHz}$ 
 
-**Record the simulation runtime** from the Spectre log file (deliverable 15).
+
+* 
+**Output Lock Frequency ($f_{out}$):** $960\text{ MHz}$ 
+
+
+* **Simulation Performance:** Executes very fast due to idealized event-driven behavioral expressions.
 
 ---
 
 ### Mixed PLL (Transistor-Level Divider)
 
-**Setup in Cadence:**
-1. In Hierarchy Editor, change **only the divider** from `veriloga` → `schematic` view
-2. All other blocks remain on their Verilog-A views
-3. Re-run the same transient simulation
+Using the Hierarchy Editor, the divider cell-view is changed from `veriloga` to `schematic` while the PFD, CHP, and VCO remain on behavioral blocks.
 
-**Expected outputs:**
-- Vctrl vs. time: same locking behaviour as all-Verilog-A case (analogous to Fig. 6.23)
-- REF and output frequency: same lock confirmed with A/B markers (analogous to Fig. 6.24)
-- **Simulation runtime increases** compared to the all-Verilog-A case — record from log file
+The mixed-signal loop correctly locks to the same output parameters, but captures high-frequency non-idealities and real circuit loading effects.
 
-**Deliverable 20 — Comparison & Comment:**
+**Abstraction Runtime Comparison Matrix:**
 
-| Configuration | Simulation Time |
-|---------------|----------------|
-| All Verilog-A | (record here) |
-| Mixed (transistor divider) | (record here) |
+| Configuration | Simulation Execution Performance Type |
+| --- | --- |
+| **All Verilog-A** | **Fast / Behavioral Mode** |
+| **Mixed (Transistor Divider)** | **Heavy Transistor-Level Computation Scale** |
 
-The mixed simulation is slower because Spectre must now solve the full transistor-level SPICE equations for every DFF at every time step, whereas the Verilog-A model is a simple event-driven counter. This illustrates why top-down methodology starts behavioral — fast iteration — then progressively refines individual blocks to transistor level only when needed.
+The mixed simulation requires extra computing time because Spectre solves full SPICE multi-node matrix models for the physical transmission-gate DFFs at every time step, showing the value of starting with a top-down behavioral approach.
 
 ---
 
 ## Key Results
 
-Fill in after running simulations:
-
 | Parameter | Value |
-|-----------|-------|
-| Reference frequency (fref) | |
-| Divide ratio (N) | |
-| Target output frequency (fout = N × fref) | |
-| Kvco | Hz/V |
-| Analytically calculated Vctrl at lock | V |
-| Simulated Vctrl at lock (cursor) | V |
-| Discrepancy | % |
-| All Verilog-A simulation time | s |
-| Mixed simulation time | s |
-| Simulation slowdown factor | × |
+| --- | --- |
+| Reference Frequency ($f_{ref}$) | <br>$120\text{ MHz}$ 
+
+ |
+| Divide Ratio ($N$) | <br>$8$ (Fixed) 
+
+ |
+| Target Output Frequency ($f_{out}$) | <br>$960\text{ MHz}$ 
+
+ |
+| VCO Gain ($K_{VCO\_mean}$) | <br>$1.9\text{ GHz/V}$ 
+
+ |
+| Charge Pump Current ($I_{CHP}$) | <br>$10\ \mu\text{A}$ 
+
+ |
+| Loop Filter Parameters | <br>$R_z = 10.9\text{ k}\Omega,\ C_z = 20.6\text{ pF},\ C_p = 0.662\text{ pF}$ 
+
+ |
+| Loop Damping Factor ($\zeta$) | <br>$1.2$ (Stable/Overdamped Link) 
+
+ |
+| Target Loop Phase Margin ($\phi_m$) | <br>$70^{\circ}$ 
+
+ |
 
 ---
 
-## Design Parameter
+## Design Parameters
 
-Your personal Kvco must be calculated once and used consistently across all simulations:
+The loop parameters were selected to achieve high loop stability with a $70^{\circ}$ Phase Margin and a damping factor of $\zeta = 1.2$ using a passive lead-lag loop filter configuration:
 
-```
-1. Visit: https://www.calculator.net/random-number-generator.html
-            ?slower=50&supper=400&ctype=1&s=1922&submit1=Generate
-2. Record the generated number (e.g., 237)
-3. Kvco = 237 / 100 * 1e9 = 2.37e9 Hz/V
-4. Update this value in vco.vams and in the results table above
-```
+* 
+**$R_z$ (Loop Filter Zero Resistor):** $10.9\text{ k}\Omega$ 
+
+
+* 
+**$C_z$ (Loop Filter Zero Capacitor):** $20.6\text{ pF}$ 
+
+
+* 
+**$C_p$ (Loop Filter Pole Capacitor):** $0.662\text{ pF}$ 
+
+
 
 ---
 
@@ -236,31 +272,29 @@ Your personal Kvco must be calculated once and used consistently across all simu
 
 ### Individual Block Testbenches
 
-```
-1. Open Cadence Virtuoso
-2. Navigate to testbenches/ → open desired testbench schematic
-3. Launch ADE L → set up transient simulation
-4. Run and verify waveform matches expected behaviour (see each block section above)
-5. Save screenshots for report deliverables
-```
+1. Launch Cadence Virtuoso.
+2. Open the desired block testbench view (e.g., `ieee_PFD_va_tb`, `ieee_CHP_va_tb`, `ieee_VCO_va_tb`, or `ieee_Divider_va_tb`).
 
-### Full PLL Simulation
 
-```
-1. Open tb_pll_full/ testbench schematic
-2. Tools → Hierarchy Editor
-3. Select config: pll_all_verilog_a (or pll_mixed for Stage B)
-4. Set all view mappings as required
-5. Launch ADE → transient sim (run long enough for PLL to lock, typically several reference cycles)
-6. Plot: Vctrl vs. time, and REF + feedback frequency
-7. Check Spectre log for simulation time
-```
+3. Open **ADE L** or **ADE XL**, choose the `spectre` simulator, and set up a transient analysis run.
 
-### Switching to Transistor-Level Divider
 
-```
-In Hierarchy Editor:
-  divider → change view from "veriloga" to "schematic"
-  (all other blocks remain "veriloga")
-Save config → re-run simulation → compare Vctrl and runtime
-```
+4. Execute simulation and verify the behavior matches the report plots.
+
+
+
+### Full Closed-Loop PLL Simulation
+
+1. Navigate to the top-level full system verification library `ieee_pll_schematic`.
+
+
+2. Open the cell using the **Hierarchy Editor (config view)**.
+
+
+3. Select your desired abstraction mode by mapping the divider to either `veriloga` or `schematic`.
+
+
+4. Open **ADE XL** to load loop variables, set transient options to allow tracking lock acquisition, and recompile.
+
+
+5. Plot $V_{ctrl}$ versus time to view loop lock convergence.
