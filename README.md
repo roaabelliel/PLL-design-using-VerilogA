@@ -1,7 +1,10 @@
 
 # PLL Design and Verilog-A Behavioral Modeling
+
 **Course:** Analog/Mixed-Signal Simulation and Modeling | IEEE ASU Student Branch 
+
 **Tool:** Cadence Virtuoso (Spectre simulator) 
+
 **Methodology:** Top-down design using Verilog-A behavioral models + transistor-level refinement 
 
 ---
