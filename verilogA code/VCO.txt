@@ -1,0 +1,55 @@
+// VerilogA code
+// AMS PLL Project: Voltage Controlled Oscillator (VCO)
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+module VCO(VCTRL,VOUT,AVDD,AVSS);
+
+	parameter real VHIGH = 1.2;
+	parameter real Vmin=0.2;
+	parameter real Vmax=1 from (Vmin:inf);
+	parameter real Fmin=0.5G from (0:inf);
+	parameter real Fmax=1.5G from (Fmin:inf);
+	parameter real trise=10p, tfall=10p, td=0;
+
+	input VCTRL;
+	output VOUT;
+        inout AVDD, AVSS; 
+	voltage VCTRL,VOUT;
+	electrical AVDD, AVSS;
+	// *** add line here ***
+      real VOUT_i, phase, freq,sine;
+
+	analog begin
+	
+		// compute the freq from the input voltage
+		freq =((V(VCTRL) - Vmin)*(Fmax - Fmin) / (Vmax - Vmin)) + Fmin;
+		// bound the frequency
+		// *** add line here ***
+		if (freq < Fmin) freq = Fmin;
+		if(freq > Fmax) freq = Fmax;
+		// calculate the phase (modulo 2*pi)
+		// *** add line here ***
+		phase= 2*3.141592654*idtmod(freq,0,1,-0.5);
+		// generate the output
+		sine = sin(phase);
+		
+		@(cross(sine,0))
+			;
+			
+		if (sine > 0) 
+			// *** add line here ***
+                        VOUT_i=1;
+		else 
+			// *** add line here ***
+                       VOUT_i=0;
+		
+		V(VOUT) <+ transition(VOUT_i,td,trise,tfall);
+	
+		// bound the time step
+		// *** add line here ***
+                $bound_step(0.1/freq);
+		
+	end
+endmodule

@@ -1,0 +1,44 @@
+// VerilogA code
+// AMS PLL Project: Phase Frequency Detector (PFD)
+`include "constants.vams"
+`include "disciplines.vams"
+// REF: Reference signal
+// FB: Feedback signal
+// UP: Up signal (FB late)
+// DN: Down signal (FB early)
+module PFD(REF,FB,UP,DN,AVDD,AVSS);
+	// VDD and threshold voltage for digital signals
+	parameter real VDD = 1.2;
+	parameter real thresh = 0.6;
+	// rise/fall/delay times of PFD output
+	parameter real trise = 10p, tfall = 10p, td = 0;
+	
+	input REF,FB;
+	output UP,DN;
+   inout AVDD,AVSS;
+	electrical REF,FB,UP,DN,AVDD,AVSS;
+	// Internal UP and DN signals
+         integer UP_i=0 , DN_i=0;  //memoey flags like a flip flop 
+	// *** add line here ***Xxxxxxx
+	
+	analog begin
+		// Check DN_i state when REF arrives
+         @(cross(V(REF)-thresh,1))
+			if(DN_i < thresh)   
+			UP_i=VDD;
+			else begin
+				UP_i = 0;
+				DN_i = 0;
+			end
+		// Check UP_i state when FB arrives		
+		@(cross(V(FB)-thresh,1))
+		   if(UP_i<thresh)	
+				DN_i = VDD;
+			else begin
+			UP_i=0;
+                                                    DN_i=0;
+			end
+		V(UP) <+transition(UP_i,td,trise,tfall);
+	    V(DN)<+transition(DN_i,td,trise,tfall);
+	end
+endmodule
